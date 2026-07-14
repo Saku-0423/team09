@@ -1,0 +1,599 @@
+/*
+ * GameManager.pde
+ * Team9 Magic Shooting
+ */
+
+class GameManager {
+
+  //-----------------------------
+  // ゲームで使用するクラス
+  //-----------------------------
+  Player player;
+  Stage stage;
+  UIManager ui;
+
+  //-----------------------------
+  // シーン管理
+  //-----------------------------
+  int scene;
+
+  //-----------------------------
+  // タイマー
+  //-----------------------------
+  int timer;
+
+  //-----------------------------
+  // タイトル画像
+  //-----------------------------
+  PImage titleImage;
+
+  //-----------------------------
+  // コンストラクタ
+  //-----------------------------
+  GameManager() {
+
+    // プレイヤー
+    player = new Player();
+
+    // ステージ
+    stage = new Stage();
+
+    // UI
+    ui = new UIManager(player);
+
+    // タイトル画像
+    titleImage = loadImage("images/title.png");
+
+    // タイトル開始
+    scene = SCENE_TITLE;
+
+    timer = 0;
+  }
+
+  //-----------------------------
+  // 更新
+  //-----------------------------
+  void update() {
+
+    switch(scene) {
+
+    case SCENE_TITLE:
+      updateTitle();
+      break;
+
+    case SCENE_STAGE_START:
+      updateStageStart();
+      break;
+
+    case SCENE_PLAY:
+      updatePlay();
+      break;
+
+    case SCENE_WARNING:
+      updateWarning();
+      break;
+
+    case SCENE_BOSS:
+      updateBoss();
+      break;
+
+    case SCENE_STAGECLEAR:
+      updateStageClear();
+      break;
+
+    case SCENE_GAMECLEAR:
+      updateGameClear();
+      break;
+
+    case SCENE_GAMEOVER:
+      updateGameOver();
+      break;
+
+    case SCENE_PAUSE:
+      break;
+
+    }
+
+  }
+
+  //-----------------------------
+  // 描画
+  //-----------------------------
+  void draw() {
+
+    switch(scene) {
+
+    case SCENE_TITLE:
+      drawTitle();
+      break;
+
+    case SCENE_STAGE_START:
+      drawStageStart();
+      break;
+
+    case SCENE_PLAY:
+      drawPlay();
+      break;
+
+    case SCENE_WARNING:
+      drawWarning();
+      break;
+
+    case SCENE_BOSS:
+      drawBoss();
+      break;
+
+    case SCENE_STAGECLEAR:
+      drawStageClear();
+      break;
+
+    case SCENE_GAMECLEAR:
+      drawGameClear();
+      break;
+
+    case SCENE_GAMEOVER:
+      drawGameOver();
+      break;
+
+    case SCENE_PAUSE:
+      drawPause();
+      break;
+
+    }
+
+  }
+    //-----------------------------
+  // タイトル更新
+  //-----------------------------
+  void updateTitle() {
+
+    timer++;
+
+  }
+
+  //-----------------------------
+  // タイトル描画
+  //-----------------------------
+  void drawTitle() {
+
+    background(20);
+
+    if(titleImage != null){
+
+      image(titleImage,
+            width/2,
+            180);
+
+    }
+
+    fill(255);
+
+    textSize(48);
+
+    text("Magic Shooting",
+         width/2,
+         330);
+
+    textSize(28);
+
+    if(frameCount%60<30){
+
+      text("Click to Start",
+           width/2,
+           520);
+
+    }
+
+    textSize(18);
+
+    text("Team9",
+         width/2,
+         670);
+
+  }
+    //-----------------------------
+  // Stage開始更新
+  //-----------------------------
+  void updateStageStart() {
+
+    timer++;
+
+    if(timer>=STAGE_START_TIME){
+
+      timer=0;
+
+      scene=SCENE_PLAY;
+
+    }
+
+  }
+
+  //-----------------------------
+  // Stage開始描画
+  //-----------------------------
+  void drawStageStart() {
+
+    stage.draw();
+
+    ui.draw();
+
+    fill(255);
+
+    textSize(60);
+
+    text("STAGE "+stage.getStageNo(),
+         width/2,
+         height/2-40);
+
+    textSize(40);
+
+    text("READY",
+         width/2,
+         height/2+40);
+
+  }
+    //-----------------------------
+  // プレイ更新
+  //-----------------------------
+  void updatePlay() {
+
+    player.update();
+
+    stage.update(player);
+
+    ui.update();
+
+    checkLife();
+
+    checkBoss();
+
+  }
+
+  //-----------------------------
+  // プレイ描画
+  //-----------------------------
+  void drawPlay() {
+
+    stage.draw();
+
+    player.draw();
+
+    ui.draw();
+
+  }
+    //-----------------------------
+  // ボス更新
+  //-----------------------------
+  void updateBoss(){
+
+    player.update();
+
+    stage.update(player);
+
+    ui.update();
+
+    checkLife();
+
+    if(stage.isStageClear()){
+
+      scene=SCENE_STAGECLEAR;
+
+      timer=0;
+
+    }
+
+  }
+
+  //-----------------------------
+  // ボス描画
+  //-----------------------------
+  void drawBoss(){
+
+    stage.draw();
+
+    player.draw();
+
+    ui.draw();
+
+  }
+    //--------------------------------------------------
+  // WARNING 更新
+  //--------------------------------------------------
+  void updateWarning() {
+
+    timer++;
+
+    if (timer >= BOSS_WARNING_TIME) {
+
+      timer = 0;
+
+      scene = SCENE_BOSS;
+
+      stage.spawnBoss();
+
+    }
+
+  }
+
+
+  //--------------------------------------------------
+  // WARNING 描画
+  //--------------------------------------------------
+  void drawWarning() {
+
+    stage.draw();
+
+    player.draw();
+
+    ui.draw();
+
+    // 赤い半透明
+    fill(255, 0, 0, 120);
+    rect(width/2, height/2, width, height);
+
+    fill(255);
+
+    textSize(60);
+
+    if (frameCount % 20 < 10) {
+
+      text("WARNING !!", width/2, height/2-40);
+
+    }
+
+    textSize(30);
+
+    text("BOSS APPROACHING",
+         width/2,
+         height/2+40);
+
+  }
+
+
+  //--------------------------------------------------
+  // Stage Clear
+  //--------------------------------------------------
+  void updateStageClear() {
+
+    timer++;
+
+    if (timer >= STAGE_CLEAR_TIME) {
+
+      timer = 0;
+
+      // 武器進化
+      player.weapon.setWeaponType(
+          stage.getStageNo());
+
+      // 次ステージ
+      if (stage.getStageNo() < MAX_STAGE) {
+
+        stage.nextStage();
+
+        scene = SCENE_STAGE_START;
+
+      }
+      else {
+
+        scene = SCENE_GAMECLEAR;
+
+      }
+
+    }
+
+  }
+
+
+  //--------------------------------------------------
+  // Stage Clear描画
+  //--------------------------------------------------
+  void drawStageClear() {
+
+    stage.draw();
+
+    player.draw();
+
+    ui.draw();
+
+    fill(255);
+
+    textSize(55);
+
+    text("STAGE CLEAR!",
+         width/2,
+         height/2-30);
+
+    textSize(30);
+
+    text("Weapon Level Up!",
+         width/2,
+         height/2+40);
+
+  }
+
+
+  //--------------------------------------------------
+  // Game Clear
+  //--------------------------------------------------
+  void updateGameClear() {
+
+  }
+
+  void drawGameClear() {
+
+    background(20);
+
+    fill(255);
+
+    textSize(60);
+
+    text("GAME CLEAR!",
+         width/2,
+         220);
+
+    textSize(26);
+
+    text("Congratulations!",
+         width/2,
+         320);
+
+    textSize(20);
+
+    text("Click to Return Title",
+         width/2,
+         600);
+
+  }
+
+
+  //--------------------------------------------------
+  // Game Over
+  //--------------------------------------------------
+  void updateGameOver() {
+
+  }
+
+  void drawGameOver() {
+
+    background(0);
+
+    fill(255, 80, 80);
+
+    textSize(60);
+
+    text("GAME OVER",
+         width/2,
+         240);
+
+    textSize(22);
+
+    text("Click to Retry",
+         width/2,
+         560);
+
+  }
+    //--------------------------------------------------
+  // マウスクリック
+  //--------------------------------------------------
+  void mousePressed() {
+
+    switch(scene) {
+
+    case SCENE_TITLE:
+
+      timer = 0;
+
+      scene = SCENE_STAGE_START;
+
+      break;
+
+    case SCENE_GAMECLEAR:
+
+      restartGame();
+
+      break;
+
+    case SCENE_GAMEOVER:
+
+      restartGame();
+
+      break;
+
+    }
+
+  }
+
+
+  //--------------------------------------------------
+  // マウス移動
+  //--------------------------------------------------
+  void mouseMoved(float mx, float my) {
+
+    if (scene == SCENE_PLAY ||
+        scene == SCENE_BOSS) {
+
+      player.setMousePosition(mx);
+
+    }
+
+  }
+
+
+  //--------------------------------------------------
+  // キー入力
+  //--------------------------------------------------
+  void keyPressed(char k) {
+
+    if (k == 'p' || k == 'P') {
+
+      if (scene == SCENE_PLAY ||
+          scene == SCENE_BOSS) {
+
+        scene = SCENE_PAUSE;
+
+      }
+      else if (scene == SCENE_PAUSE) {
+
+        scene = SCENE_PLAY;
+
+      }
+
+    }
+
+  }
+
+
+  //--------------------------------------------------
+  // キーを離す
+  //--------------------------------------------------
+  void keyReleased(char k) {
+
+  }
+    //--------------------------------------------------
+  // 残機
+  //--------------------------------------------------
+  void checkLife() {
+
+    if (player.life <= 0) {
+
+      scene = SCENE_GAMEOVER;
+
+      timer = 0;
+
+    }
+
+  }
+
+
+  //--------------------------------------------------
+  // ボス判定
+  //--------------------------------------------------
+  void checkBoss() {
+
+    if (stage.isBossReady()) {
+
+      timer = 0;
+
+      scene = SCENE_WARNING;
+
+    }
+
+  }
+    //--------------------------------------------------
+  // ゲームリセット
+  //--------------------------------------------------
+  void restartGame() {
+
+    player = new Player();
+
+    stage = new Stage();
+
+    ui = new UIManager(player);
+
+    timer = 0;
+
+    scene = SCENE_TITLE;
+
+  }
+
+}
