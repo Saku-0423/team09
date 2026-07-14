@@ -1,14 +1,16 @@
 // 自機クラス
 // マウスで左右移動し、クリックで弾を発射する
+// フィールド・メソッド名は担当C（GameManager/UIManager）側の想定に合わせてある
 class Player {
   float x, y;
-  float w, h;              // 自機のサイズ（当たり判定用）
-                            // ※ Processingのwidth/heightと名前が衝突するのでw, hにしている
+  float w, h;               // 見た目の大きさ（描画用）
+                             // ※ Processingのwidth/heightと名前が衝突するのでw, hにしている
+  float radius;              // 当たり判定用の半径（円扱い。敵・敵弾との衝突判定に使う）
   float speed;
-  int lives;
+  int life;                  // 残機数
   boolean isInvincible;
   int invincibleTimer;
-  Weapon currentWeapon;    // Weaponクラスは今後作成
+  Weapon weapon;              // 現在装備している武器
   ArrayList<PlayerBullet> bullets; // 自機が発射した弾のリスト
 
   Player(float startX, float startY) {
@@ -16,17 +18,18 @@ class Player {
     y = startY;
     w = 40;
     h = 40;
+    radius = 20;
     speed = 8;
-    lives = 3;
+    life = 3;
     isInvincible = false;
     invincibleTimer = 0;
-    currentWeapon = new Weapon();
+    weapon = new Weapon();
     bullets = new ArrayList<PlayerBullet>();
   }
 
   // 毎フレーム呼ぶ：位置の更新、無敵タイマーの減算、弾の更新
   void update() {
-    move(mouseX);
+    setMousePosition(mouseX);
 
     if (isInvincible) {
       invincibleTimer--;
@@ -50,49 +53,54 @@ class Player {
   }
 
   // マウスのx座標に自機を追従させる（画面外に出ないよう制限）
-  void move(float mx) {
+  void setMousePosition(float mx) {
     x = constrain(mx, w / 2, width - w / 2);
   }
 
   // マウスクリック時に呼ぶ：現在の武器の発射パターン通りに弾を生成する
   void shoot() {
-    float[] angles = currentWeapon.getBulletPattern();
+    float[] angles = weapon.getBulletPattern();
     for (float angle : angles) {
       bullets.add(new PlayerBullet(
         x, y - h / 2,
         angle,
-        currentWeapon.bulletSpeed,
-        currentWeapon.bulletDamage,
-        currentWeapon.selectedAttribute
+        weapon.bulletSpeed,
+        weapon.bulletDamage,
+        weapon.selectedAttribute
       ));
     }
+  }
+
+  // 現在選択中の弾属性を返す（ATTR_WATER等）
+  int getAttribute() {
+    return weapon.selectedAttribute;
   }
 
   // 被弾処理。無敵中は無視、それ以外は残機を1減らす
   void takeDamage() {
     if (isInvincible) return;
 
-    lives--;
-    if (lives < 0) lives = 0;
+    life--;
+    if (life < 0) life = 0;
 
     // 連続ダメージ防止のため、被弾直後は少し無敵にする
-    activateInvincible(90);
+    setInvincible(90);
   }
 
-  // 無敵アイテム取得時に呼ぶ
-  void activateInvincible(int duration) {
+  // 無敵状態にする（無敵アイテム取得時・被弾直後などに呼ぶ）
+  void setInvincible(int time) {
     isInvincible = true;
-    invincibleTimer = duration;
+    invincibleTimer = time;
   }
 
   // 残機回復アイテム取得時に呼ぶ
   void recoverLife() {
-    lives++;
+    life++;
   }
 
   // 残機が0になったか判定（ゲームオーバー判定に使用）
   boolean isDead() {
-    return lives <= 0;
+    return life <= 0;
   }
 
   // 自機と弾を描画する

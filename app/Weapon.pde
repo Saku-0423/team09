@@ -29,6 +29,11 @@ class Weapon {
     reset();
   }
 
+  // 現在の武器種を返す（WEAPON_PISTOL等）
+  int getWeaponType() {
+    return weaponType;
+  }
+
   // ステージ開始時に呼ぶ：ステージ番号に応じて武器種と性能を切り替える
   void setWeaponType(int stageNumber) {
     if (stageNumber <= 1) {
