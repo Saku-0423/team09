@@ -2,9 +2,9 @@ Enemy enemy;
 
 void setup() {
 
-  size(800,600);
+  size(800, 600);
 
-  enemy = new Enemy(width/2,-20);
+  enemy = new Enemy(width / 2, -20, ENEMY_FIRE);
 }
 
 void draw() {
