@@ -48,17 +48,17 @@ class Weapon {
     switch (weaponType) {
       case WEAPON_PISTOL:
         bulletCount  = 1;
-        bulletSpeed  = 8;
+        bulletSpeed  = 16;
         bulletDamage = 1;
         break;
       case WEAPON_SHOTGUN:
         bulletCount  = 3;
-        bulletSpeed  = 7;
+        bulletSpeed  = 14;
         bulletDamage = 1;
         break;
       case WEAPON_RIFLE:
         bulletCount  = 1;
-        bulletSpeed  = 12;
+        bulletSpeed  = 22;
         bulletDamage = 2;
         break;
     }

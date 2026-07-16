@@ -5,6 +5,8 @@
 
 Player player;
 PFont jpFont;
+PImage[] backgrounds;
+int currentStage = 1; // 1:ピストル/stage1, 2:ショットガン/stage2, 3:ライフル/stage3
 
 void setup() {
   size(1280, 720); // 担当Cが決めた画面サイズ
@@ -13,10 +15,17 @@ void setup() {
   // 日本語表示用のフォントを読み込む（Windows標準のMeiryoを使用）
   jpFont = createFont("Meiryo", 16);
   textFont(jpFont);
+
+  // ステージ背景を読み込む（appフォルダに置いた前提。読み込めない場合はdataフォルダに移動する）
+  backgrounds = new PImage[3];
+  backgrounds[0] = loadImage("stage1.jpg");
+  backgrounds[1] = loadImage("stage2.jpg");
+  backgrounds[2] = loadImage("stage3.jpg");
 }
 
 void draw() {
-  background(10, 10, 30);
+  // 現在のステージ番号に応じた背景を画面いっぱいに描画
+  image(backgrounds[currentStage - 1], 0, 0, width, height);
 
   player.update();
   player.draw();
@@ -27,16 +36,16 @@ void draw() {
   text("life: " + player.life, 20, 30);
   text("weaponType: " + player.weapon.getWeaponType(), 20, 50);
   text("attribute: " + player.getAttribute(), 20, 70);
-  text("[1][2][3]キーで武器種切り替え / クリックで発射", 20, height - 20);
+  text("[1][2][3]キーで武器種・背景切り替え / クリックで発射", 20, height - 20);
 }
 
 void mousePressed() {
   player.shoot();
 }
 
-// 動作確認用：キーで武器種を切り替えられるようにしておく
+// 動作確認用：キーで武器種と背景を切り替えられるようにしておく
 void keyPressed() {
-  if (key == '1') player.weapon.setWeaponType(1);
-  if (key == '2') player.weapon.setWeaponType(2);
-  if (key == '3') player.weapon.setWeaponType(3);
+  if (key == '1') { player.weapon.setWeaponType(1); currentStage = 1; }
+  if (key == '2') { player.weapon.setWeaponType(2); currentStage = 2; }
+  if (key == '3') { player.weapon.setWeaponType(3); currentStage = 3; }
 }
