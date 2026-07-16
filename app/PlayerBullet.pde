@@ -42,9 +42,22 @@ class PlayerBullet {
   }
 
   void draw() {
-    noStroke();
-    fill(attributeColor());
-    ellipse(x, y, radius * 2, radius * 2);
+
+    // 属性の画像（fire / water / thunder）を弾として描画する
+    PImage img = attributeBulletImage(attribute);
+
+    if (img != null) {
+
+      imageMode(CENTER);
+      image(img, x, y, radius * 4, radius * 4);
+
+    } else {
+
+      noStroke();
+      fill(attributeColor());
+      ellipse(x, y, radius * 2, radius * 2);
+
+    }
   }
 
   // 属性ごとの表示色（弾選択UIの見た目と揃える。実際の配色は担当Cとすり合わせ予定）

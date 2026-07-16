@@ -32,6 +32,12 @@ class Stage {
   int spawnTimer;
 
   //------------------------------
+  // 敵弾
+  //------------------------------
+
+  ArrayList<EnemyBullet> enemyBullets;
+
+  //------------------------------
   // アイテム
   //------------------------------
 
@@ -61,6 +67,8 @@ class Stage {
 
     items = new ArrayList<Item>();
 
+    enemyBullets = new ArrayList<EnemyBullet>();
+
     loadStage();
 
   }
@@ -79,11 +87,15 @@ class Stage {
 
     backgroundY = 0;
 
+    boss = null;
+
+    enemyBullets.clear();
+
     switch(stageNo){
 
       case 1:
 
-        background = loadImage("images/background1.png");
+        background = loadImage("stage1.jpg");
 
         createStage1();
 
@@ -91,7 +103,7 @@ class Stage {
 
       case 2:
 
-        background = loadImage("images/background2.png");
+        background = loadImage("stage2.jpg");
 
         createStage2();
 
@@ -99,7 +111,7 @@ class Stage {
 
       case 3:
 
-        background = loadImage("images/background3.png");
+        background = loadImage("stage3.jpg");
 
         createStage3();
 
@@ -120,9 +132,11 @@ class Stage {
 
     updateEnemies(player);
 
-    updateItems(player);
+    updateBoss(player);
 
-    updateBoss();
+    updateEnemyBullets(player);
+
+    updateItems(player);
 
     checkBoss();
 
@@ -138,6 +152,8 @@ class Stage {
     drawBackground();
 
     drawEnemies();
+
+    drawEnemyBullets();
 
     drawItems();
 
@@ -164,6 +180,18 @@ class Stage {
   //------------------------------
 
   void drawBackground(){
+
+    if(background == null){
+
+      // 画像が無い場合の仮の背景
+      fill(20, 20, 40);
+      noStroke();
+      rectMode(CORNER);
+      rect(0, 0, width, height);
+      rectMode(CENTER);
+      return;
+
+    }
 
     image(background,
           width/2,
@@ -192,13 +220,117 @@ class Stage {
 
     }
 
-    if(spawnTimer >= 120){
+    if(spawnTimer >= 60){ // 敵の出現間隔を短縮（120→60）
 
       enemies[spawnIndex].setActive(true);
 
       spawnIndex++;
 
       spawnTimer = 0;
+
+    }
+
+  }
+    //------------------------------
+  // 敵更新
+  //------------------------------
+
+  void updateEnemies(Player player){
+
+    for(int i=0; i<enemyCount; i++){
+
+      Enemy e = enemies[i];
+
+      if(e == null) continue;
+
+      if(!e.isActive()) continue;
+
+      if(!e.isAlive()) continue;
+
+      e.update();
+
+      // 自機弾との当たり判定（1体につき1フレーム1発まで）
+      for(PlayerBullet b : player.bullets){
+
+        if(e.hit(b)){
+
+          if(!e.isAlive()){
+
+            dropItem(e.getX(), e.getY());
+
+          }
+
+          break;
+
+        }
+
+      }
+
+      // 敵の攻撃（自機を狙って属性弾を撃つ）
+      EnemyBullet eb = e.tryAttack(player);
+
+      if(eb != null){
+
+        enemyBullets.add(eb);
+
+      }
+
+    }
+
+  }
+    //------------------------------
+  // 敵描画
+  //------------------------------
+
+  void drawEnemies(){
+
+    for(int i=0; i<enemyCount; i++){
+
+      Enemy e = enemies[i];
+
+      if(e == null) continue;
+
+      if(!e.isActive()) continue;
+
+      if(!e.isAlive()) continue;
+
+      e.draw();
+
+    }
+
+  }
+    //------------------------------
+  // 敵弾更新
+  //------------------------------
+
+  void updateEnemyBullets(Player player){
+
+    for(int i=enemyBullets.size()-1; i>=0; i--){
+
+      EnemyBullet b = enemyBullets.get(i);
+
+      b.move();
+
+      b.hitPlayer(player);
+
+      if(!b.isActive){
+
+        enemyBullets.remove(i);
+
+      }
+
+    }
+
+  }
+    //------------------------------
+  // 敵弾描画
+  //------------------------------
+
+  void drawEnemyBullets(){
+
+    for(EnemyBullet b : enemyBullets){
+
+      b.display();
 
     }
 
@@ -219,22 +351,46 @@ class Stage {
     enemies[7] = new FireSpirit(800,-80);
 
 }
-void createStage1(){
+  //--------------------------------------------------
+  // ステージ2：氷のゴーレム中心の構成（仮）
+  //--------------------------------------------------
+  void createStage2(){
 
     enemyCount = 8;
 
     enemies = new Enemy[enemyCount];
 
-    enemies[0] = new FireSpirit(250,-80);
-    enemies[1] = new FireSpirit(700,-80);
+    enemies[0] = new IceGolem(250,-80);
+    enemies[1] = new IceGolem(700,-80);
     enemies[2] = new WindSpirit(450,-80);
-    enemies[3] = new FireSpirit(100,-80);
+    enemies[3] = new IceGolem(100,-80);
     enemies[4] = new WindSpirit(900,-80);
-    enemies[5] = new FireSpirit(600,-80);
-    enemies[6] = new WindSpirit(300,-80);
-    enemies[7] = new FireSpirit(800,-80);
+    enemies[5] = new IceGolem(600,-80);
+    enemies[6] = new IceGolem(300,-80);
+    enemies[7] = new WindSpirit(800,-80);
 
-}
+  }
+  //--------------------------------------------------
+  // ステージ3：3種混合、やや数多め（仮）
+  //--------------------------------------------------
+  void createStage3(){
+
+    enemyCount = 10;
+
+    enemies = new Enemy[enemyCount];
+
+    enemies[0] = new FireSpirit(200,-80);
+    enemies[1] = new IceGolem(500,-80);
+    enemies[2] = new WindSpirit(800,-80);
+    enemies[3] = new FireSpirit(1000,-80);
+    enemies[4] = new IceGolem(150,-80);
+    enemies[5] = new WindSpirit(650,-80);
+    enemies[6] = new FireSpirit(900,-80);
+    enemies[7] = new IceGolem(350,-80);
+    enemies[8] = new WindSpirit(50,-80);
+    enemies[9] = new FireSpirit(750,-80);
+
+  }
   //--------------------------------------------------
   // アイテム生成
   //--------------------------------------------------
@@ -337,13 +493,38 @@ void createStage1(){
     //--------------------------------------------------
   // ボス更新
   //--------------------------------------------------
-  void updateBoss(){
+  void updateBoss(Player player){
 
     if(!bossSpawned) return;
 
     if(boss==null) return;
 
     boss.update();
+
+    // 自機弾との当たり判定
+    for(PlayerBullet b : player.bullets){
+
+      boss.hit(b);
+
+    }
+
+    // 通常攻撃（自機狙い）
+    EnemyBullet eb = boss.tryAttack(player);
+
+    if(eb != null){
+
+      enemyBullets.add(eb);
+
+    }
+
+    // 特殊攻撃（フェーズ2以降）
+    ArrayList<EnemyBullet> special = boss.trySpecialAttack(player);
+
+    if(special != null){
+
+      enemyBullets.addAll(special);
+
+    }
 
   }
     //--------------------------------------------------

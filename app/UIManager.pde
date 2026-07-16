@@ -61,15 +61,15 @@ class UIManager {
     message = "";
     messageTimer = 0;
 
-    lifeImage = loadImage("images/life.png");
+    lifeImage = loadImage("life.png");
 
-    waterImage = loadImage("images/water.png");
-    fireImage = loadImage("images/fire.png");
-    thunderImage = loadImage("images/thunder.png");
+    waterImage = loadImage("water.png");
+    fireImage = loadImage("fire.png");
+    thunderImage = loadImage("thunder.png");
 
-    pistolImage = loadImage("images/pistol.png");
-    shotgunImage = loadImage("images/shotgun.png");
-    rifleImage = loadImage("images/rifle.png");
+    pistolImage = loadImage("pistol.png");
+    shotgunImage = loadImage("shotgun.png");
+    rifleImage = loadImage("rifle.png");
 
   }
 
@@ -122,13 +122,23 @@ class UIManager {
 
     for(int i=0;i<player.life;i++){
 
-      image(
-        lifeImage,
-        35+i*45,
-        35,
-        35,
-        35
-      );
+      if(lifeImage != null){
+
+        image(
+          lifeImage,
+          35+i*45,
+          35,
+          35,
+          35
+        );
+
+      } else {
+
+        fill(255, 60, 120);
+        noStroke();
+        ellipse(35+i*45, 35, 30, 30);
+
+      }
 
     }
 
@@ -140,30 +150,50 @@ class UIManager {
   void drawWeapon(){
 
     PImage weaponImage;
+    String weaponLabel;
 
     switch(player.weapon.getWeaponType()){
 
       case WEAPON_PISTOL:
         weaponImage = pistolImage;
+        weaponLabel = "PISTOL";
         break;
 
       case WEAPON_SHOTGUN:
         weaponImage = shotgunImage;
+        weaponLabel = "SHOTGUN";
         break;
 
       default:
         weaponImage = rifleImage;
+        weaponLabel = "RIFLE";
         break;
 
     }
 
-    image(
-      weaponImage,
-      SCREEN_WIDTH-45,
-      40,
-      45,
-      45
-    );
+    if(weaponImage != null){
+
+      image(
+        weaponImage,
+        SCREEN_WIDTH-45,
+        40,
+        45,
+        45
+      );
+
+    } else {
+
+      fill(200);
+      noStroke();
+      rectMode(CENTER);
+      rect(SCREEN_WIDTH-45, 40, 45, 45);
+
+      fill(0);
+      textAlign(CENTER, CENTER);
+      textSize(10);
+      text(weaponLabel, SCREEN_WIDTH-45, 40);
+
+    }
 
   }
 
@@ -173,30 +203,44 @@ class UIManager {
   void drawAttribute(){
 
     PImage attributeImage;
+    color attributeColor;
 
     switch(player.getAttribute()){
 
       case ATTR_WATER:
         attributeImage = waterImage;
+        attributeColor = COLOR_WATER;
         break;
 
       case ATTR_FIRE:
         attributeImage = fireImage;
+        attributeColor = COLOR_FIRE;
         break;
 
       default:
         attributeImage = thunderImage;
+        attributeColor = COLOR_THUNDER;
         break;
 
     }
 
-    image(
-      attributeImage,
-      SCREEN_WIDTH-100,
-      40,
-      40,
-      40
-    );
+    if(attributeImage != null){
+
+      image(
+        attributeImage,
+        SCREEN_WIDTH-100,
+        40,
+        40,
+        40
+      );
+
+    } else {
+
+      fill(attributeColor);
+      noStroke();
+      ellipse(SCREEN_WIDTH-100, 40, 40, 40);
+
+    }
 
   }
 

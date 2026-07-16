@@ -9,6 +9,9 @@ class Boss extends Enemy {
   PImage redBoss;
   PImage yellowBoss;
 
+  int specialTimer;
+  int specialInterval = 120; // 特殊攻撃の間隔（180→120で頻度アップ）
+
   Boss(float x, float y, int stage) {
 
     super(x, y, ENEMY_FIRE);
@@ -17,9 +20,15 @@ class Boss extends Enemy {
     maxHp = 100;
 
     radius = 60;
-    speed = 1;
+    speed = 2.5;          // ボスの移動を速く（1→2.5）
+
+    targetY = 140;        // ボスがとどまる高さは固定
+    attackInterval = 35;  // 通常攻撃の間隔（頻度アップ）
 
     phase = 1;
+    specialTimer = 0;
+
+    active = true; // ボスは出現演出を経て呼ばれるので即アクティブでよい
 
     name = "エレメンタルドラゴン";
 
@@ -36,6 +45,12 @@ class Boss extends Enemy {
 
     // 初期弱点
     weakType = ATTR_WATER;
+  }
+
+  // Stage.spawnBoss()からステージ番号だけで呼べるようにするための簡易コンストラクタ
+  // 出現位置は画面上部中央に固定
+  Boss(int stage) {
+    this(width / 2, -100, stage);
   }
 
   void update() {
@@ -78,20 +93,39 @@ class Boss extends Enemy {
   }
 
   @Override
-  EnemyBullet attack() {
+  EnemyBullet attack(Player player) {
 
-    return new EnemyBullet(x, y);
+    // 現在の弱点と同じ属性の弾を自機狙いで撃つ（弱点のヒントにもなる）
+    float angle = atan2(player.y - y, player.x - x);
+
+    return new EnemyBullet(x, y, weakType, angle, ENEMY_BULLET_SPEED + 1);
   }
 
-  ArrayList<EnemyBullet> specialAttack() {
+  ArrayList<EnemyBullet> specialAttack(Player player) {
 
     ArrayList<EnemyBullet> bullets = new ArrayList<EnemyBullet>();
 
-    bullets.add(new EnemyBullet(x - 30, y));
-    bullets.add(new EnemyBullet(x, y));
-    bullets.add(new EnemyBullet(x + 30, y));
+    // 自機狙いの3方向弾
+    float angle = atan2(player.y - y, player.x - x);
+    float spread = radians(18);
+
+    bullets.add(new EnemyBullet(x, y, weakType, angle - spread, ENEMY_BULLET_SPEED + 1));
+    bullets.add(new EnemyBullet(x, y, weakType, angle,          ENEMY_BULLET_SPEED + 1));
+    bullets.add(new EnemyBullet(x, y, weakType, angle + spread, ENEMY_BULLET_SPEED + 1));
 
     return bullets;
+  }
+
+  // フェーズ2以降、一定間隔でspecialAttack()を実行する（呼ばれない間はnull）
+  ArrayList<EnemyBullet> trySpecialAttack(Player player) {
+    if (phase < 2) return null;
+
+    specialTimer++;
+    if (specialTimer >= specialInterval) {
+      specialTimer = 0;
+      return specialAttack(player);
+    }
+    return null;
   }
 
   void changeWeakType() {

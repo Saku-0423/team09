@@ -54,13 +54,13 @@ class Item {
 
     if(type==ITEM_HEAL){
 
-      image=loadImage("images/healItem.png");
+      image=loadImage("healItem.png");
 
     }
 
     else{
 
-      image=loadImage("images/invincibleItem.png");
+      image=loadImage("invincibleItem.png");
 
     }
 
@@ -101,7 +101,23 @@ class Item {
 
     rotate(radians(angle));
 
-    image(image,0,0);
+    if(image != null){
+
+      image(image,0,0);
+
+    } else {
+
+      noStroke();
+
+      if(type==ITEM_HEAL){
+        fill(255,80,120);
+      } else {
+        fill(255,220,80);
+      }
+
+      ellipse(0,0,radius*2,radius*2);
+
+    }
 
     popMatrix();
 
@@ -135,14 +151,20 @@ class Item {
 
       case ITEM_HEAL:
 
-        player.life++;
+        // ライフは最大PLAYER_MAX_LIFEまで（回復しすぎ防止）
+        if(player.life < PLAYER_MAX_LIFE){
+
+          player.life++;
+
+        }
 
         break;
 
       case ITEM_INVINCIBLE:
 
+        // 無敵アイテムの無敵時間は8秒
         player.setInvincible(
-          PLAYER_INVINCIBLE_TIME
+          PLAYER_ITEM_INVINCIBLE_TIME
         );
 
         break;

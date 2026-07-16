@@ -19,12 +19,18 @@ class Player {
     w = 40;
     h = 40;
     radius = 20;
-    speed = 8;
-    life = 3;
+    speed = PLAYER_SPEED;
+    life = PLAYER_START_LIFE;
     isInvincible = false;
     invincibleTimer = 0;
     weapon = new Weapon();
     bullets = new ArrayList<PlayerBullet>();
+  }
+
+  // 引数なしで生成された場合は、画面下中央をデフォルト位置にする
+  // （GameManager側がPlayer()で生成する想定のため）
+  Player() {
+    this(width / 2, height - 80);
   }
 
   // 毎フレーム呼ぶ：位置の更新、無敵タイマーの減算、弾の更新
@@ -83,8 +89,8 @@ class Player {
     life--;
     if (life < 0) life = 0;
 
-    // 連続ダメージ防止のため、被弾直後は少し無敵にする
-    setInvincible(90);
+    // 連続ダメージ防止のため、被弾直後は少し無敵にする（3秒）
+    setInvincible(PLAYER_HIT_INVINCIBLE_TIME);
   }
 
   // 無敵状態にする（無敵アイテム取得時・被弾直後などに呼ぶ）
@@ -93,9 +99,11 @@ class Player {
     invincibleTimer = time;
   }
 
-  // 残機回復アイテム取得時に呼ぶ
+  // 残機回復アイテム取得時に呼ぶ（上限PLAYER_MAX_LIFEまで）
   void recoverLife() {
-    life++;
+    if (life < PLAYER_MAX_LIFE) {
+      life++;
+    }
   }
 
   // 残機が0になったか判定（ゲームオーバー判定に使用）

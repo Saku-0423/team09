@@ -42,7 +42,7 @@ class GameManager {
     ui = new UIManager(player);
 
     // タイトル画像
-    titleImage = loadImage("images/title.png");
+    titleImage = loadImage("title.png");
 
     // タイトル開始
     scene = SCENE_TITLE;
@@ -196,15 +196,8 @@ class GameManager {
   //-----------------------------
   void updateStageStart() {
 
+    // クリックで開始するように変更（mousePressed()で遷移）
     timer++;
-
-    if(timer>=STAGE_START_TIME){
-
-      timer=0;
-
-      scene=SCENE_PLAY;
-
-    }
 
   }
 
@@ -230,6 +223,16 @@ class GameManager {
     text("READY",
          width/2,
          height/2+40);
+
+    textSize(24);
+
+    if(frameCount%60<30){
+
+      text("Click to Start",
+           width/2,
+           height/2+110);
+
+    }
 
   }
     //-----------------------------
@@ -301,17 +304,8 @@ class GameManager {
   //--------------------------------------------------
   void updateWarning() {
 
+    // クリックでボス戦を開始するように変更（mousePressed()で遷移）
     timer++;
-
-    if (timer >= BOSS_WARNING_TIME) {
-
-      timer = 0;
-
-      scene = SCENE_BOSS;
-
-      stage.spawnBoss();
-
-    }
 
   }
 
@@ -347,6 +341,12 @@ class GameManager {
          width/2,
          height/2+40);
 
+    textSize(24);
+
+    text("Click to Start",
+         width/2,
+         height/2+110);
+
   }
 
 
@@ -361,14 +361,17 @@ class GameManager {
 
       timer = 0;
 
-      // 武器進化
-      player.weapon.setWeaponType(
-          stage.getStageNo());
+      ui.setBoss(null); // 表示中のボス情報をクリア
 
       // 次ステージ
       if (stage.getStageNo() < MAX_STAGE) {
 
         stage.nextStage();
+
+        // 武器進化（修正：nextStage()の前に旧ステージ番号で設定していたため
+        // 武器がずっとpistolのままだった。新しいステージ番号で設定する）
+        player.weapon.setWeaponType(
+            stage.getStageNo());
 
         scene = SCENE_STAGE_START;
 
@@ -411,6 +414,34 @@ class GameManager {
 
   }
 
+
+  //--------------------------------------------------
+  // Pause 描画
+  //--------------------------------------------------
+  void drawPause() {
+
+    stage.draw();
+
+    player.draw();
+
+    ui.draw();
+
+    // 半透明の黒でオーバーレイ
+    fill(0, 160);
+    rectMode(CENTER);
+    rect(width/2, height/2, width, height);
+
+    fill(255);
+
+    textSize(50);
+
+    text("PAUSE", width/2, height/2 - 20);
+
+    textSize(22);
+
+    text("Press P to Resume", width/2, height/2 + 40);
+
+  }
 
   //--------------------------------------------------
   // Game Clear
@@ -487,6 +518,36 @@ class GameManager {
 
       break;
 
+    case SCENE_STAGE_START:
+
+      // READY画面はクリックで開始
+      timer = 0;
+
+      scene = SCENE_PLAY;
+
+      break;
+
+    case SCENE_WARNING:
+
+      // WARNING画面はクリックでボス戦開始
+      timer = 0;
+
+      scene = SCENE_BOSS;
+
+      stage.spawnBoss();
+
+      ui.setBoss(stage.boss); // ボスHP/名前表示のためUIManagerに渡す
+
+      break;
+
+    case SCENE_PLAY:
+    case SCENE_BOSS:
+
+      // クリックで弾を発射（修正：Player.shoot()が未使用だった）
+      player.shoot();
+
+      break;
+
     case SCENE_GAMECLEAR:
 
       restartGame();
@@ -523,6 +584,25 @@ class GameManager {
   // キー入力
   //--------------------------------------------------
   void keyPressed(char k) {
+
+    // 属性切り替え（修正：Weapon.switchAttribute()が未使用だった）
+    // 1=水 / 2=炎 / 3=雷、スペースキーで順番に切り替え
+    if (scene == SCENE_PLAY || scene == SCENE_BOSS) {
+
+      if (k == '1') {
+        player.weapon.switchAttribute(ATTR_WATER);
+      }
+      else if (k == '2') {
+        player.weapon.switchAttribute(ATTR_FIRE);
+      }
+      else if (k == '3') {
+        player.weapon.switchAttribute(ATTR_THUNDER);
+      }
+      else if (k == ' ') {
+        player.weapon.switchAttribute();
+      }
+
+    }
 
     if (k == 'p' || k == 'P') {
 

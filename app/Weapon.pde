@@ -2,21 +2,15 @@
 // ステージが変わると武器種（ピストル→ショットガン→ライフル）が切り替わり、
 // それに伴って弾の威力・速度・同時発射数も変化する。
 // 敵撃破によるレベルアップはない。
-
-final int WEAPON_PISTOL  = 1;
-final int WEAPON_SHOTGUN = 2;
-final int WEAPON_RIFLE   = 3;
-
-// 弾属性（弾選択UIの3種に対応。Enemy側のweakAttributeと同じ定義を共有する）
+//
+// 属性定数（ATTR_WATER等）・武器種定数（WEAPON_PISTOL等）はConfig.pdeで定義されている。
 // 敵一覧との対応：
 //   ATTR_WATER   … 炎の精霊の弱点
 //   ATTR_FIRE    … 氷のゴーレムの弱点
 //   ATTR_THUNDER … 風の精霊の弱点
 // ボスの弱点属性は未定。決まり次第、必要なら属性を追加する。
-final int ATTR_WATER   = 0;
-final int ATTR_FIRE    = 1;
-final int ATTR_THUNDER = 2;
-final int NUM_ATTRIBUTES = 3;
+
+final int NUM_ATTRIBUTES = 3; // Config.pdeに無いのでここで定義
 
 class Weapon {
   int weaponType;         // 現在の武器種（WEAPON_PISTOL等）
@@ -39,9 +33,9 @@ class Weapon {
     if (stageNumber <= 1) {
       weaponType = WEAPON_PISTOL;
     } else if (stageNumber == 2) {
-      weaponType = WEAPON_SHOTGUN;
+      weaponType = WEAPON_RIFLE;    // ステージ2はライフル
     } else {
-      weaponType = WEAPON_RIFLE;
+      weaponType = WEAPON_SHOTGUN;  // ステージ3はショットガン
     }
 
     // 武器種ごとの性能。数値は仮なので、実際に動かしながら調整する想定。
@@ -51,15 +45,17 @@ class Weapon {
         bulletSpeed  = 16;
         bulletDamage = 1;
         break;
-      case WEAPON_SHOTGUN:
-        bulletCount  = 3;
-        bulletSpeed  = 14;
+      case WEAPON_RIFLE:
+        // ライフル：弾の速度が上がる
+        bulletCount  = 1;
+        bulletSpeed  = 24;
         bulletDamage = 1;
         break;
-      case WEAPON_RIFLE:
-        bulletCount  = 1;
-        bulletSpeed  = 22;
-        bulletDamage = 2;
+      case WEAPON_SHOTGUN:
+        // ショットガン：3方向に弾が出る（弾速はピストルと同等）
+        bulletCount  = 3;
+        bulletSpeed  = 16;
+        bulletDamage = 1;
         break;
     }
   }
