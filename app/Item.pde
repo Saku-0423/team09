@@ -164,7 +164,7 @@ class Item {
 
         // 無敵アイテムの無敵時間は8秒
         player.setInvincible(
-          PLAYER_ITEM_INVINCIBLE_TIME
+          PLAYER_ITEM_INVINCIBLE_MS
         );
 
         break;

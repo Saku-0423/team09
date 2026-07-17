@@ -9,7 +9,7 @@ class Player {
   float speed;
   int life;                  // 残機数
   boolean isInvincible;
-  int invincibleTimer;
+  int invincibleUntil; // 無敵が終わる時刻（millis()基準の実時間）
   Weapon weapon;              // 現在装備している武器
   ArrayList<PlayerBullet> bullets; // 自機が発射した弾のリスト
 
@@ -22,7 +22,7 @@ class Player {
     speed = PLAYER_SPEED;
     life = PLAYER_START_LIFE;
     isInvincible = false;
-    invincibleTimer = 0;
+    invincibleUntil = 0;
     weapon = new Weapon();
     bullets = new ArrayList<PlayerBullet>();
   }
@@ -30,18 +30,17 @@ class Player {
   // 引数なしで生成された場合は、画面下中央をデフォルト位置にする
   // （GameManager側がPlayer()で生成する想定のため）
   Player() {
-    this(width / 2, height - 80);
+    this(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 80);
   }
 
   // 毎フレーム呼ぶ：位置の更新、無敵タイマーの減算、弾の更新
   void update() {
-    setMousePosition(mouseX);
+    setMousePosition(gameMouseX);
 
-    if (isInvincible) {
-      invincibleTimer--;
-      if (invincibleTimer <= 0) {
-        isInvincible = false;
-      }
+    // フレーム数ではなく実時間で判定する
+    // （処理落ちでFPSが下がっても無敵時間が延びないように）
+    if (isInvincible && millis() >= invincibleUntil) {
+      isInvincible = false;
     }
 
     updateBullets();
@@ -60,7 +59,7 @@ class Player {
 
   // マウスのx座標に自機を追従させる（画面外に出ないよう制限）
   void setMousePosition(float mx) {
-    x = constrain(mx, w / 2, width - w / 2);
+    x = constrain(mx, w / 2, SCREEN_WIDTH - w / 2);
   }
 
   // マウスクリック時に呼ぶ：現在の武器の発射パターン通りに弾を生成する
@@ -90,13 +89,14 @@ class Player {
     if (life < 0) life = 0;
 
     // 連続ダメージ防止のため、被弾直後は少し無敵にする（3秒）
-    setInvincible(PLAYER_HIT_INVINCIBLE_TIME);
+    setInvincible(PLAYER_HIT_INVINCIBLE_MS);
   }
 
   // 無敵状態にする（無敵アイテム取得時・被弾直後などに呼ぶ）
-  void setInvincible(int time) {
+  // durationMs：無敵の長さ（ミリ秒）
+  void setInvincible(int durationMs) {
     isInvincible = true;
-    invincibleTimer = time;
+    invincibleUntil = millis() + durationMs;
   }
 
   // 残機回復アイテム取得時に呼ぶ（上限PLAYER_MAX_LIFEまで）

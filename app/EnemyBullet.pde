@@ -39,8 +39,8 @@ class EnemyBullet {
     y += vy;
 
     // 画面外に出たら消す（横方向にも飛ぶようになったため全方向を判定）
-    if (x < -radius || x > width + radius ||
-        y < -radius || y > height + radius) {
+    if (x < -radius || x > SCREEN_WIDTH + radius ||
+        y < -radius || y > SCREEN_HEIGHT + radius) {
       isActive = false;
     }
   }

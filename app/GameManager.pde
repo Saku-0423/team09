@@ -44,6 +44,14 @@ class GameManager {
     // タイトル画像
     titleImage = loadImage("title.png");
 
+    // タイトル画像は画面サイズに合わせて一度だけ縮小しておく
+    if(titleImage != null){
+
+      // OSにウィンドウを縮小されることがあるため、実際のサイズに合わせる
+      titleImage.resize(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    }
+
     // タイトル開始
     scene = SCENE_TITLE;
 
@@ -141,6 +149,17 @@ class GameManager {
 
     }
 
+    // FPS表示（Fキーで切り替え、重さの診断用）
+    if (showFps) {
+
+      fill(255, 255, 0);
+
+      textSize(16);
+
+      text(nf(frameRate, 0, 1) + " fps", 60, 24);
+
+    }
+
   }
     //-----------------------------
   // タイトル更新
@@ -160,35 +179,50 @@ class GameManager {
 
     if(titleImage != null){
 
+      // タイトル画像を画面いっぱいに表示する
+      // （修正：画面サイズの画像を座標(SCREEN_WIDTH/2,180)に置いていたため
+      //   上に大きくはみ出し、さらに文字が画像と重なって崩れていた。
+      //   ロゴと"Click To Start"は画像に含まれているので文字は重ねない）
       image(titleImage,
-            width/2,
-            180);
+            SCREEN_WIDTH/2,
+            SCREEN_HEIGHT/2);
+
+      fill(255);
+
+      textSize(18);
+
+      text("Team9",
+           SCREEN_WIDTH/2,
+           705);
+
+    } else {
+
+      // 画像が無い場合の予備表示
+      fill(255);
+
+      textSize(48);
+
+      text("Magic Shooting",
+           SCREEN_WIDTH/2,
+           330);
+
+      textSize(28);
+
+      if(frameCount%60<30){
+
+        text("Click to Start",
+             SCREEN_WIDTH/2,
+             520);
+
+      }
+
+      textSize(18);
+
+      text("Team9",
+           SCREEN_WIDTH/2,
+           670);
 
     }
-
-    fill(255);
-
-    textSize(48);
-
-    text("Magic Shooting",
-         width/2,
-         330);
-
-    textSize(28);
-
-    if(frameCount%60<30){
-
-      text("Click to Start",
-           width/2,
-           520);
-
-    }
-
-    textSize(18);
-
-    text("Team9",
-         width/2,
-         670);
 
   }
     //-----------------------------
@@ -215,22 +249,22 @@ class GameManager {
     textSize(60);
 
     text("STAGE "+stage.getStageNo(),
-         width/2,
-         height/2-40);
+         SCREEN_WIDTH/2,
+         SCREEN_HEIGHT/2-40);
 
     textSize(40);
 
     text("READY",
-         width/2,
-         height/2+40);
+         SCREEN_WIDTH/2,
+         SCREEN_HEIGHT/2+40);
 
     textSize(24);
 
     if(frameCount%60<30){
 
       text("Click to Start",
-           width/2,
-           height/2+110);
+           SCREEN_WIDTH/2,
+           SCREEN_HEIGHT/2+110);
 
     }
 
@@ -323,7 +357,7 @@ class GameManager {
 
     // 赤い半透明
     fill(255, 0, 0, 120);
-    rect(width/2, height/2, width, height);
+    rect(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     fill(255);
 
@@ -331,21 +365,21 @@ class GameManager {
 
     if (frameCount % 20 < 10) {
 
-      text("WARNING !!", width/2, height/2-40);
+      text("WARNING !!", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-40);
 
     }
 
     textSize(30);
 
     text("BOSS APPROACHING",
-         width/2,
-         height/2+40);
+         SCREEN_WIDTH/2,
+         SCREEN_HEIGHT/2+40);
 
     textSize(24);
 
     text("Click to Start",
-         width/2,
-         height/2+110);
+         SCREEN_WIDTH/2,
+         SCREEN_HEIGHT/2+110);
 
   }
 
@@ -403,14 +437,14 @@ class GameManager {
     textSize(55);
 
     text("STAGE CLEAR!",
-         width/2,
-         height/2-30);
+         SCREEN_WIDTH/2,
+         SCREEN_HEIGHT/2-30);
 
     textSize(30);
 
     text("Weapon Level Up!",
-         width/2,
-         height/2+40);
+         SCREEN_WIDTH/2,
+         SCREEN_HEIGHT/2+40);
 
   }
 
@@ -429,17 +463,17 @@ class GameManager {
     // 半透明の黒でオーバーレイ
     fill(0, 160);
     rectMode(CENTER);
-    rect(width/2, height/2, width, height);
+    rect(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     fill(255);
 
     textSize(50);
 
-    text("PAUSE", width/2, height/2 - 20);
+    text("PAUSE", SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 20);
 
     textSize(22);
 
-    text("Press P to Resume", width/2, height/2 + 40);
+    text("Press P to Resume", SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 40);
 
   }
 
@@ -459,19 +493,19 @@ class GameManager {
     textSize(60);
 
     text("GAME CLEAR!",
-         width/2,
+         SCREEN_WIDTH/2,
          220);
 
     textSize(26);
 
     text("Congratulations!",
-         width/2,
+         SCREEN_WIDTH/2,
          320);
 
     textSize(20);
 
     text("Click to Return Title",
-         width/2,
+         SCREEN_WIDTH/2,
          600);
 
   }
@@ -493,13 +527,13 @@ class GameManager {
     textSize(60);
 
     text("GAME OVER",
-         width/2,
+         SCREEN_WIDTH/2,
          240);
 
     textSize(22);
 
     text("Click to Retry",
-         width/2,
+         SCREEN_WIDTH/2,
          560);
 
   }
@@ -583,7 +617,14 @@ class GameManager {
   //--------------------------------------------------
   // キー入力
   //--------------------------------------------------
+  boolean showFps = false; // Fキーで表示切り替え（重さの診断用）
+
   void keyPressed(char k) {
+
+    // FPS表示の切り替え
+    if (k == 'f' || k == 'F') {
+      showFps = !showFps;
+    }
 
     // 属性切り替え（修正：Weapon.switchAttribute()が未使用だった）
     // 1=水 / 2=炎 / 3=雷、スペースキーで順番に切り替え

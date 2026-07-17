@@ -119,6 +119,14 @@ class Stage {
 
     }
 
+    // 描画負荷軽減：読み込み時に一度だけ画面サイズへ縮小しておく
+    if(background != null){
+
+      // OSにウィンドウを縮小されることがあるため、実際のサイズに合わせる
+      background.resize(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    }
+
   }
     //------------------------------
   // 更新
@@ -166,13 +174,8 @@ class Stage {
 
   void updateBackground(){
 
-    backgroundY += BACKGROUND_SPEED;
-
-    if(backgroundY >= height){
-
-      backgroundY = 0;
-
-    }
+    // 背景はステージごとの固定表示に変更
+    // （縦スクロールでループしていたのが「クルクル回って見える」原因だった）
 
   }
     //------------------------------
@@ -187,23 +190,17 @@ class Stage {
       fill(20, 20, 40);
       noStroke();
       rectMode(CORNER);
-      rect(0, 0, width, height);
+      rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
       rectMode(CENTER);
       return;
 
     }
 
+    // 事前に画面サイズへ縮小済みなので、1枚だけそのまま描画する
+    // （毎フレーム2枚を拡大縮小しながら描いていたのが処理落ちの主原因）
     image(background,
-          width/2,
-          backgroundY-height/2,
-          width,
-          height);
-
-    image(background,
-          width/2,
-          backgroundY+height/2,
-          width,
-          height);
+          SCREEN_WIDTH/2,
+          SCREEN_HEIGHT/2);
 
   }
    //------------------------------
@@ -337,18 +334,17 @@ class Stage {
   }
   void createStage1(){
 
-    enemyCount = 8;
+    // fireSpirit×3 + windSpirit×3 の6体構成
+    enemyCount = 6;
 
     enemies = new Enemy[enemyCount];
 
     enemies[0] = new FireSpirit(250,-80);
-    enemies[1] = new FireSpirit(700,-80);
-    enemies[2] = new WindSpirit(450,-80);
-    enemies[3] = new FireSpirit(100,-80);
-    enemies[4] = new WindSpirit(900,-80);
-    enemies[5] = new FireSpirit(600,-80);
-    enemies[6] = new WindSpirit(300,-80);
-    enemies[7] = new FireSpirit(800,-80);
+    enemies[1] = new WindSpirit(700,-80);
+    enemies[2] = new FireSpirit(450,-80);
+    enemies[3] = new WindSpirit(100,-80);
+    enemies[4] = new FireSpirit(900,-80);
+    enemies[5] = new WindSpirit(500,-80);
 
 }
   //--------------------------------------------------
@@ -356,16 +352,17 @@ class Stage {
   //--------------------------------------------------
   void createStage2(){
 
+    // iceGolem×4 + windSpirit×4 の8体構成
     enemyCount = 8;
 
     enemies = new Enemy[enemyCount];
 
     enemies[0] = new IceGolem(250,-80);
-    enemies[1] = new IceGolem(700,-80);
-    enemies[2] = new WindSpirit(450,-80);
-    enemies[3] = new IceGolem(100,-80);
-    enemies[4] = new WindSpirit(900,-80);
-    enemies[5] = new IceGolem(600,-80);
+    enemies[1] = new WindSpirit(700,-80);
+    enemies[2] = new IceGolem(450,-80);
+    enemies[3] = new WindSpirit(100,-80);
+    enemies[4] = new IceGolem(900,-80);
+    enemies[5] = new WindSpirit(600,-80);
     enemies[6] = new IceGolem(300,-80);
     enemies[7] = new WindSpirit(800,-80);
 
@@ -391,6 +388,33 @@ class Stage {
     enemies[9] = new FireSpirit(750,-80);
 
   }
+  //--------------------------------------------------
+  // 撃破数（UIの「0/6」表示用）
+  //--------------------------------------------------
+  int getKilledCount(){
+
+    int count = 0;
+
+    for(Enemy e : enemies){
+
+      if(e != null && e.isDead()){
+
+        count++;
+
+      }
+
+    }
+
+    return count;
+
+  }
+
+  int getTotalEnemies(){
+
+    return enemyCount;
+
+  }
+
   //--------------------------------------------------
   // アイテム生成
   //--------------------------------------------------

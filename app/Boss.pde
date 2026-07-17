@@ -12,18 +12,23 @@ class Boss extends Enemy {
   int specialTimer;
   int specialInterval = 120; // 特殊攻撃の間隔（180→120で頻度アップ）
 
+  int nextWeakChangeAt;   // 次に弱点が切り替わる時刻（millis()基準の実時間）
+
   Boss(float x, float y, int stage) {
 
     super(x, y, ENEMY_FIRE);
 
-    hp = 100;
-    maxHp = 100;
+    hp = 300;    // ボスのHPを増やした（100→300、瞬殺対策）
+    maxHp = 300;
 
     radius = 60;
     speed = 2.5;          // ボスの移動を速く（1→2.5）
 
     targetY = 140;        // ボスがとどまる高さは固定
-    attackInterval = 35;  // 通常攻撃の間隔（頻度アップ）
+
+    // 最初の弱点切り替え時刻を抽選（実時間ベース）
+    nextWeakChangeAt = millis() + int(random(BOSS_WEAK_CHANGE_MIN_MS, BOSS_WEAK_CHANGE_MAX_MS));
+    attackInterval = 55;  // 通常攻撃の間隔（難易度調整で35→55に緩和）
 
     phase = 1;
     specialTimer = 0;
@@ -35,12 +40,15 @@ class Boss extends Enemy {
     // ステージごとの画像
     if (stage == 1) {
       bossImage = loadImage("boss1.png");
+      if (bossImage != null) bossImage.resize(int(radius*2), int(radius*2)); // 事前縮小
     }
     else if (stage == 2) {
       bossImage = loadImage("boss2.png");
+      if (bossImage != null) bossImage.resize(int(radius*2), int(radius*2)); // 事前縮小
     }
     else {
       bossImage = loadImage("boss3.png");
+      if (bossImage != null) bossImage.resize(int(radius*2), int(radius*2)); // 事前縮小
     }
 
     // 初期弱点
@@ -50,11 +58,26 @@ class Boss extends Enemy {
   // Stage.spawnBoss()からステージ番号だけで呼べるようにするための簡易コンストラクタ
   // 出現位置は画面上部中央に固定
   Boss(int stage) {
-    this(width / 2, -100, stage);
+    this(SCREEN_WIDTH / 2, -100, stage);
   }
 
   void update() {
     move();
+    updateWeakType();
+  }
+
+  // 3〜10秒おき（ランダム）に弱点を切り替える
+  // フレーム数ではなく実時間で計るので、処理落ちしても間隔は正確
+  void updateWeakType() {
+
+    if (millis() >= nextWeakChangeAt) {
+
+      // 次の切り替え時刻をあらためて抽選
+      nextWeakChangeAt = millis() + int(random(BOSS_WEAK_CHANGE_MIN_MS, BOSS_WEAK_CHANGE_MAX_MS));
+
+      changeWeakType();
+
+    }
   }
 
   @Override
@@ -130,7 +153,16 @@ class Boss extends Enemy {
 
   void changeWeakType() {
 
-    weakType = (weakType + 1) % NUM_ATTRIBUTES;
+    // 現在の弱点以外からランダムに選ぶ（順番だと予測できてしまうため）
+    int next = weakType;
+
+    while (next == weakType) {
+
+      next = int(random(NUM_ATTRIBUTES));
+
+    }
+
+    weakType = next;
 
     switch (weakType) {
 
@@ -153,11 +185,12 @@ class Boss extends Enemy {
 
     super.damage(damage, attribute);
 
-    if (phase == 1 && hp <= maxHp / 2) {
+    // 弱点の切り替えは時間ベース（updateWeakType()）に変更。
+    // phaseは特殊攻撃（3方向弾）の解禁用に残す：HP75%以下でphase2
+    if (phase == 1 && hp <= maxHp * 3 / 4) {
 
       phase = 2;
 
-      changeWeakType();
     }
   }
 

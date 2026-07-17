@@ -31,7 +31,7 @@ class PlayerBullet {
 
   // 画面外に出たかを判定し、出ていたらisActiveをfalseにする（不要な弾の削除用）
   void checkOffscreen() {
-    if (x < -radius || x > width + radius || y < -radius || y > height + radius) {
+    if (x < -radius || x > SCREEN_WIDTH + radius || y < -radius || y > SCREEN_HEIGHT + radius) {
       isActive = false;
     }
   }

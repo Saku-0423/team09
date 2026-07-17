@@ -268,6 +268,7 @@ class UIManager {
   //==========================
   void drawScore(){
 
+    // SCOREの代わりに「倒した敵の数／倒さなきゃいけない敵の数」を表示する
     fill(255);
 
     textAlign(RIGHT,CENTER);
@@ -275,7 +276,7 @@ class UIManager {
     textSize(20);
 
     text(
-      "SCORE",
+      "ENEMY",
       SCREEN_WIDTH-20,
       80
     );
@@ -283,7 +284,7 @@ class UIManager {
     textSize(28);
 
     text(
-      score,
+      game.stage.getKilledCount() + " / " + game.stage.getTotalEnemies(),
       SCREEN_WIDTH-20,
       110
     );

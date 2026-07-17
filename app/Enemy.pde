@@ -62,6 +62,11 @@ class Enemy {
         enemyImage = loadImage("windSpirit.png");
         break;
     }
+
+    // 描画負荷軽減：読み込み時に描画サイズへ縮小しておく
+    if (enemyImage != null) {
+      enemyImage.resize(int(radius*2), int(radius*2));
+    }
   }
 
   void update() {
@@ -88,8 +93,8 @@ class Enemy {
         x = radius;
         dir = 1;
       }
-      if (x > width - radius) {
-        x = width - radius;
+      if (x > SCREEN_WIDTH - radius) {
+        x = SCREEN_WIDTH - radius;
         dir = -1;
       }
 
