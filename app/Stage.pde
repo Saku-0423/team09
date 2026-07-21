@@ -11,6 +11,8 @@ class Stage {
 
   int stageNo;
 
+  Player playerRef; // 敵の急接近（windSpiritなど）が自機を狙うための参照
+
   //------------------------------
   // 背景
   //------------------------------
@@ -42,6 +44,8 @@ class Stage {
   //------------------------------
 
   ArrayList<Item> items;
+
+  int itemFloatTimer; // ランダム出現アイテムの抽選タイマー
 
   //------------------------------
   // ボス
@@ -146,6 +150,8 @@ class Stage {
 
     updateItems(player);
 
+    spawnFloatingItem();
+
     checkBoss();
 
     checkStageClear();
@@ -217,7 +223,7 @@ class Stage {
 
     }
 
-    if(spawnTimer >= 60){ // 敵の出現間隔を短縮（120→60）
+    if(spawnTimer >= ENEMY_SPAWN_INTERVAL){ // 敵の出現間隔（Config.pdeで10秒に設定）
 
       enemies[spawnIndex].setActive(true);
 
@@ -339,12 +345,12 @@ class Stage {
 
     enemies = new Enemy[enemyCount];
 
-    enemies[0] = new FireSpirit(250,-80);
-    enemies[1] = new WindSpirit(700,-80);
-    enemies[2] = new FireSpirit(450,-80);
-    enemies[3] = new WindSpirit(100,-80);
-    enemies[4] = new FireSpirit(900,-80);
-    enemies[5] = new WindSpirit(500,-80);
+    enemies[0] = new FireSpirit(250,-80,playerRef);
+    enemies[1] = new WindSpirit(700,-80,playerRef);
+    enemies[2] = new FireSpirit(450,-80,playerRef);
+    enemies[3] = new WindSpirit(100,-80,playerRef);
+    enemies[4] = new FireSpirit(900,-80,playerRef);
+    enemies[5] = new WindSpirit(500,-80,playerRef);
 
 }
   //--------------------------------------------------
@@ -357,14 +363,14 @@ class Stage {
 
     enemies = new Enemy[enemyCount];
 
-    enemies[0] = new IceGolem(250,-80);
-    enemies[1] = new WindSpirit(700,-80);
-    enemies[2] = new IceGolem(450,-80);
-    enemies[3] = new WindSpirit(100,-80);
-    enemies[4] = new IceGolem(900,-80);
-    enemies[5] = new WindSpirit(600,-80);
-    enemies[6] = new IceGolem(300,-80);
-    enemies[7] = new WindSpirit(800,-80);
+    enemies[0] = new IceGolem(250,-80,playerRef);
+    enemies[1] = new WindSpirit(700,-80,playerRef);
+    enemies[2] = new IceGolem(450,-80,playerRef);
+    enemies[3] = new WindSpirit(100,-80,playerRef);
+    enemies[4] = new IceGolem(900,-80,playerRef);
+    enemies[5] = new WindSpirit(600,-80,playerRef);
+    enemies[6] = new IceGolem(300,-80,playerRef);
+    enemies[7] = new WindSpirit(800,-80,playerRef);
 
   }
   //--------------------------------------------------
@@ -376,16 +382,16 @@ class Stage {
 
     enemies = new Enemy[enemyCount];
 
-    enemies[0] = new FireSpirit(200,-80);
-    enemies[1] = new IceGolem(500,-80);
-    enemies[2] = new WindSpirit(800,-80);
-    enemies[3] = new FireSpirit(1000,-80);
-    enemies[4] = new IceGolem(150,-80);
-    enemies[5] = new WindSpirit(650,-80);
-    enemies[6] = new FireSpirit(900,-80);
-    enemies[7] = new IceGolem(350,-80);
-    enemies[8] = new WindSpirit(50,-80);
-    enemies[9] = new FireSpirit(750,-80);
+    enemies[0] = new FireSpirit(200,-80,playerRef);
+    enemies[1] = new IceGolem(500,-80,playerRef);
+    enemies[2] = new WindSpirit(800,-80,playerRef);
+    enemies[3] = new FireSpirit(1000,-80,playerRef);
+    enemies[4] = new IceGolem(150,-80,playerRef);
+    enemies[5] = new WindSpirit(650,-80,playerRef);
+    enemies[6] = new FireSpirit(900,-80,playerRef);
+    enemies[7] = new IceGolem(350,-80,playerRef);
+    enemies[8] = new WindSpirit(50,-80,playerRef);
+    enemies[9] = new FireSpirit(750,-80,playerRef);
 
   }
   //--------------------------------------------------
@@ -416,7 +422,43 @@ class Stage {
   }
 
   //--------------------------------------------------
-  // アイテム生成
+  // ランダム出現アイテム
+  // （敵を倒した時のドロップとは別に、プレイ中まれに上から出現する）
+  //--------------------------------------------------
+  void spawnFloatingItem(){
+
+    itemFloatTimer++;
+
+    if(itemFloatTimer < ITEM_FLOAT_CHECK_INTERVAL){
+
+      return;
+
+    }
+
+    itemFloatTimer = 0;
+
+    // 一定間隔ごとに低確率で抽選（当たった時だけ出現）
+    if(random(1) > ITEM_FLOAT_SPAWN_RATE){
+
+      return;
+
+    }
+
+    float fx = random(60, SCREEN_WIDTH - 60);
+
+    // 自機が届く下寄りの帯の中に直接出現させる（画面上から落とすと届かないため）
+    float fy = random(ITEM_FLOAT_MIN_Y, ITEM_FLOAT_MAX_Y);
+
+    int ftype = (random(1) < 0.5) ? ITEM_HEAL : ITEM_INVINCIBLE;
+
+    items.add(
+      new Item(fx, fy, ftype, true) // isFloating=trueで生成
+    );
+
+  }
+
+  //--------------------------------------------------
+  // アイテム生成（敵を倒した時のドロップ）
   //--------------------------------------------------
   void dropItem(float x,float y){
 

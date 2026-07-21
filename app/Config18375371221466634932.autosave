@@ -16,18 +16,6 @@ final int FPS = 60;
 
 final int ENEMY_SPAWN_INTERVAL = FPS * 8; // 敵の出現間隔：8秒に1体
 
-final int WEAK_DAMAGE_MULTIPLIER = 4; // 弱点属性で攻撃した時のダメージ倍率（通常の敵用）
-
-final int BOSS_WEAK_DAMAGE_MULTIPLIER = 4; // ボスの弱点ダメージ倍率（通常の敵とは別に調整可能）
-
-final int ITEM_FLOAT_CHECK_INTERVAL = FPS * 3;  // ランダム出現の抽選間隔：3秒ごとに抽選
-final float ITEM_FLOAT_SPAWN_RATE = 0.12;       // 抽選ごとの出現確率（低めに設定）
-final float ITEM_FLOAT_SPEED = 5.5;             // ランダム出現アイテムの動く速さ（速め）
-final int ITEM_FLOAT_LIFETIME = FPS * 6;        // 取られなければ6秒で自然消滅
-
-final float ITEM_FLOAT_MIN_Y = 380;             // ランダム出現アイテムが動き回る範囲の上端
-final float ITEM_FLOAT_MAX_Y = SCREEN_HEIGHT - 110; // 動き回る範囲の下端（自機の少し上まで）
-
 
 /*==================================================
   スクロール速度

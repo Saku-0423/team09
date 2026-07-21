@@ -16,13 +16,34 @@ class Boss extends Enemy {
 
   Boss(float x, float y, int stage) {
 
-    super(x, y, ENEMY_FIRE);
+    super(x, y, ENEMY_FIRE, null); // ボスは急接近モーションを使わないためtargetPlayerはnullでよい
 
-    hp = 300;    // ボスのHPを増やした（100→300、瞬殺対策）
-    maxHp = 300;
+    // ステージごとにHPを変える（1:150 / 2:250 / 3:350）
+    switch(stage){
+
+      case 1:
+        maxHp = 150;
+        break;
+
+      case 2:
+        maxHp = 250;
+        break;
+
+      default:
+        maxHp = 350;
+        break;
+
+    }
+
+    hp = maxHp;
 
     radius = 60;
     speed = 2.5;          // ボスの移動を速く（1→2.5）
+
+    // Enemy側に追加した「特徴的な動き」（ダッシュ等）はボスには適用しない
+    // （ボスの動きはこれまでの調整のまま変えない）
+    bobAmp = 0;
+    motionTimer = Integer.MAX_VALUE;
 
     targetY = 140;        // ボスがとどまる高さは固定
 
@@ -180,10 +201,20 @@ class Boss extends Enemy {
     }
   }
 
+  // ボスは通常の敵（Enemy.damage()）とは別に、専用の弱点倍率で計算する
   @Override
   void damage(int damage, int attribute) {
 
-    super.damage(damage, attribute);
+    if (attribute == weakType) {
+      hp -= damage * BOSS_WEAK_DAMAGE_MULTIPLIER;
+    } else {
+      hp -= damage;
+    }
+
+    if (hp <= 0) {
+      hp = 0;
+      active = false;
+    }
 
     // 弱点の切り替えは時間ベース（updateWeakType()）に変更。
     // phaseは特殊攻撃（3方向弾）の解禁用に残す：HP75%以下でphase2
@@ -196,6 +227,10 @@ class Boss extends Enemy {
 
   int getHp() {
     return hp;
+  }
+
+  int getWeakType() {
+    return weakType;
   }
 
   int getMaxHp() {

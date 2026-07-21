@@ -111,6 +111,8 @@ class UIManager {
 
     drawBossHP();
 
+    drawBossWeak();
+
     drawBossName();
 
   }
@@ -338,6 +340,56 @@ class UIManager {
     );
 
     rectMode(CENTER);
+
+  }
+
+  //==========================
+  // ボスの弱点表示（オーラの色＝弱点属性、を分かりやすく文字とアイコンで示す）
+  //==========================
+  void drawBossWeak(){
+
+    if(boss == null) return;
+
+    if(!boss.isAlive()) return;
+
+    color weakColor;
+    String weakLabel;
+
+    switch(boss.getWeakType()){
+
+      case ATTR_WATER:
+        weakColor = COLOR_WATER;
+        weakLabel = "WATER";
+        break;
+
+      case ATTR_FIRE:
+        weakColor = COLOR_FIRE;
+        weakLabel = "FIRE";
+        break;
+
+      default:
+        weakColor = COLOR_THUNDER;
+        weakLabel = "THUNDER";
+        break;
+
+    }
+
+    // HPバーの左上あたりに「弱点属性の色の丸＋WEAK POINT」を表示
+    noStroke();
+
+    fill(weakColor);
+
+    ellipse(240, 55, 20, 20);
+
+    fill(255);
+
+    textAlign(LEFT, CENTER);
+
+    textSize(16);
+
+    text("WEAK POINT: " + weakLabel, 256, 55);
+
+    textAlign(CENTER, CENTER);
 
   }
 

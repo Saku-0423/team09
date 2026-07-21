@@ -26,6 +26,7 @@ class GameManager {
   // タイトル画像
   //-----------------------------
   PImage titleImage;
+  PImage logoImage; // タイトルロゴ（Canvaで別途作成、透過PNG推奨）
 
   //-----------------------------
   // コンストラクタ
@@ -37,18 +38,30 @@ class GameManager {
 
     // ステージ
     stage = new Stage();
+    stage.playerRef = player;
 
     // UI
     ui = new UIManager(player);
 
     // タイトル画像
-    titleImage = loadImage("title.png");
+    titleImage = loadImage("title.jpg");
 
     // タイトル画像は画面サイズに合わせて一度だけ縮小しておく
     if(titleImage != null){
 
       // OSにウィンドウを縮小されることがあるため、実際のサイズに合わせる
       titleImage.resize(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    }
+
+    logoImage = loadImage("logo.png"); // タイトルロゴ（無ければ文字表示にフォールバック）
+
+    // ロゴも大きすぎる場合に備えて表示サイズへ縮小しておく（横幅700pxを上限に）
+    if(logoImage != null && logoImage.width > 600){
+
+      float scale = 600.0 / logoImage.width;
+
+      logoImage.resize(600, int(logoImage.height * scale));
 
     }
 
@@ -180,49 +193,57 @@ class GameManager {
     if(titleImage != null){
 
       // タイトル画像を画面いっぱいに表示する
-      // （修正：画面サイズの画像を座標(SCREEN_WIDTH/2,180)に置いていたため
-      //   上に大きくはみ出し、さらに文字が画像と重なって崩れていた。
-      //   ロゴと"Click To Start"は画像に含まれているので文字は重ねない）
+      // 画像には文字を焼き込まず、ロゴ・Click to Start・Team9は
+      // すべてコード側で重ねて描画する
       image(titleImage,
             SCREEN_WIDTH/2,
             SCREEN_HEIGHT/2);
 
-      fill(255);
+    } else {
 
-      textSize(18);
+      // 画像が無い場合は背景だけ塗っておく
+      background(20);
 
-      text("Team9",
-           SCREEN_WIDTH/2,
-           705);
+    }
+
+    // ---- ここから文字を重ねる（画像の有無に関わらず共通） ----
+
+    if(logoImage != null){
+
+      // ロゴ画像を中央やや上に表示
+      image(logoImage, SCREEN_WIDTH/2, 260);
 
     } else {
 
-      // 画像が無い場合の予備表示
+      // ロゴ画像が無い場合は文字で代用（影を薄く敷いて背景に負けないように）
+      textSize(64);
+
+      fill(0, 160);
+      text("Magic Shooting", SCREEN_WIDTH/2 + 3, 283);
+
       fill(255);
-
-      textSize(48);
-
-      text("Magic Shooting",
-           SCREEN_WIDTH/2,
-           330);
-
-      textSize(28);
-
-      if(frameCount%60<30){
-
-        text("Click to Start",
-             SCREEN_WIDTH/2,
-             520);
-
-      }
-
-      textSize(18);
-
-      text("Team9",
-           SCREEN_WIDTH/2,
-           670);
+      text("Magic Shooting", SCREEN_WIDTH/2, 280);
 
     }
+
+    // Click to Start：点滅表示
+    textSize(28);
+
+    if(frameCount%60<30){
+
+      fill(0, 160);
+      text("Click to Start", SCREEN_WIDTH/2 + 2, 522);
+
+      fill(255);
+      text("Click to Start", SCREEN_WIDTH/2, 520);
+
+    }
+
+    // クレジット表記
+    textSize(18);
+
+    fill(255);
+    text("Team9", SCREEN_WIDTH/2, 690);
 
   }
     //-----------------------------
@@ -708,6 +729,7 @@ class GameManager {
     player = new Player();
 
     stage = new Stage();
+    stage.playerRef = player;
 
     ui = new UIManager(player);
 
