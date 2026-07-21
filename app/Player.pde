@@ -12,6 +12,7 @@ class Player {
   int invincibleUntil; // 無敵が終わる時刻（millis()基準の実時間）
   Weapon weapon;              // 現在装備している武器
   ArrayList<PlayerBullet> bullets; // 自機が発射した弾のリスト
+  PImage playerImage;        // 自機の画像（Canvaで作成）
 
   Player(float startX, float startY) {
     x = startX;
@@ -25,6 +26,13 @@ class Player {
     invincibleUntil = 0;
     weapon = new Weapon();
     bullets = new ArrayList<PlayerBullet>();
+
+    playerImage = loadImage("player.png");
+
+    // 描画負荷軽減＆見た目を統一するため、読み込み時に描画サイズへ縮小しておく
+    if (playerImage != null) {
+      playerImage.resize(int(w * 1.6), int(h * 1.6));
+    }
   }
 
   // 引数なしで生成された場合は、画面下中央をデフォルト位置にする
@@ -115,10 +123,20 @@ class Player {
   void draw() {
     // 無敵中は自機のみ点滅させる（弾は通常通り描画）
     if (!(isInvincible && frameCount % 6 < 3)) {
-      noStroke();
-      fill(80, 160, 220);
-      // 画面イメージに合わせて上向きの三角形で描画
-      triangle(x, y - h / 2, x - w / 2, y + h / 2, x + w / 2, y + h / 2);
+
+      if (playerImage != null) {
+
+        imageMode(CENTER);
+        image(playerImage, x, y);
+
+      } else {
+
+        // 画像が無い場合は三角形にフォールバック
+        noStroke();
+        fill(80, 160, 220);
+        triangle(x, y - h / 2, x - w / 2, y + h / 2, x + w / 2, y + h / 2);
+
+      }
     }
 
     for (PlayerBullet b : bullets) {
