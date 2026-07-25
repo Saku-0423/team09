@@ -18,6 +18,12 @@ final int ENEMY_SPAWN_INTERVAL = FPS * 8; // 敵の出現間隔：8秒に1体
 
 final int WEAK_DAMAGE_MULTIPLIER = 4; // 弱点属性で攻撃した時のダメージ倍率（通常の敵用）
 
+// 描画の密度（1 or 2）。
+// 2にすると高解像度ディスプレイできれいに（滑らかに）表示されるが、
+// 描画するピクセル数が実質4倍になるため、PCによっては重くなる。
+// 画質を優先するなら2、動作の軽さを優先するなら1にする。
+final int PIXEL_DENSITY = 1;
+
 final int BOSS_WEAK_DAMAGE_MULTIPLIER = 4; // ボスの弱点ダメージ倍率（通常の敵とは別に調整可能）
 
 final int ITEM_FLOAT_CHECK_INTERVAL = FPS * 3;  // ランダム出現の抽選間隔：3秒ごとに抽選

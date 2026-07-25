@@ -34,14 +34,12 @@ float gameMouseY = 0;
 void settings() {
 
   // 画面サイズ（setup()内だとConfig.pdeの定数を認識できないためsettings()に分離）
-  // P2D（OpenGL）でGPU描画にして高速化。
-  // もし起動しなくなったら size(SCREEN_WIDTH, SCREEN_HEIGHT); に戻すこと
+  // P2D（OpenGL）でGPU描画にして高速化・画質向上。
   size(SCREEN_WIDTH, SCREEN_HEIGHT, P2D);
 
-  // 高解像度ディスプレイで自動的に2倍解像度（pixelDensity(2)）で
-  // 描画されるのを止める。2倍だと描画するピクセル数が4倍になり、
-  // 処理落ちの大きな原因になる
-  pixelDensity(1);
+  // 高解像度ディスプレイでの描画密度。Config.pdeで切り替えられる
+  // （2の方がきれいだが重くなる。1の方が軽いがギザギザが目立つことがある）
+  pixelDensity(PIXEL_DENSITY);
 
   // 描画を滑らかにする（settings()を自作している場合はここに書く）
   smooth();
@@ -54,8 +52,12 @@ void settings() {
 
 void setup() {
 
-  // ウィンドウの最大化・サイズ変更を許可する
-  surface.setResizable(true);
+  // ウィンドウのリサイズ・最大化は許可しない
+  // ※surface.setResizable(true) の呼び出し自体の中でJOGLがデッドロックする
+  //   ("Waited 5000ms for..."、スタックトレースにWindowImpl.setResizableが
+  //   直接含まれていた）ことが確認されたため、この呼び出しを完全に取り除いた。
+  //   P2D自体は維持できる（クラッシュの原因はP2D本体ではなくこの呼び出しだった可能性が高い）。
+  // surface.setResizable(true);
 
   // フレームレート
   frameRate(FPS);

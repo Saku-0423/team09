@@ -27,6 +27,7 @@ class GameManager {
   //-----------------------------
   PImage titleImage;
   PImage logoImage; // タイトルロゴ（Canvaで別途作成、透過PNG推奨）
+  PImage clearImage; // GAME CLEAR画面の背景（Canvaで作成）
 
   //-----------------------------
   // コンストラクタ
@@ -62,6 +63,14 @@ class GameManager {
       float scale = 600.0 / logoImage.width;
 
       logoImage.resize(600, int(logoImage.height * scale));
+
+    }
+
+    clearImage = loadImage("clear.png"); // 無ければ黒背景にフォールバック
+
+    if(clearImage != null){
+
+      clearImage.resize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     }
 
@@ -116,6 +125,7 @@ class GameManager {
     }
 
   }
+
 
   //-----------------------------
   // 描画
@@ -283,7 +293,7 @@ class GameManager {
 
     if(frameCount%60<30){
 
-      text("Click to Start",
+      text("Press SPACE to Start",
            SCREEN_WIDTH/2,
            SCREEN_HEIGHT/2+110);
 
@@ -398,7 +408,7 @@ class GameManager {
 
     textSize(24);
 
-    text("Click to Start",
+    text("Press SPACE to Start",
          SCREEN_WIDTH/2,
          SCREEN_HEIGHT/2+110);
 
@@ -417,6 +427,10 @@ class GameManager {
       timer = 0;
 
       ui.setBoss(null); // 表示中のボス情報をクリア
+
+      // 画面に残っている自機弾を消す
+      // （修正：ステージ遷移時に直前まで撃っていた弾が残り続けていた）
+      player.clearBullets();
 
       // 次ステージ
       if (stage.getStageNo() < MAX_STAGE) {
@@ -507,7 +521,15 @@ class GameManager {
 
   void drawGameClear() {
 
-    background(20);
+    if(clearImage != null){
+
+      image(clearImage, SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+
+    } else {
+
+      background(20);
+
+    }
 
     fill(255);
 
@@ -573,28 +595,6 @@ class GameManager {
 
       break;
 
-    case SCENE_STAGE_START:
-
-      // READY画面はクリックで開始
-      timer = 0;
-
-      scene = SCENE_PLAY;
-
-      break;
-
-    case SCENE_WARNING:
-
-      // WARNING画面はクリックでボス戦開始
-      timer = 0;
-
-      scene = SCENE_BOSS;
-
-      stage.spawnBoss();
-
-      ui.setBoss(stage.boss); // ボスHP/名前表示のためUIManagerに渡す
-
-      break;
-
     case SCENE_PLAY:
     case SCENE_BOSS:
 
@@ -647,8 +647,34 @@ class GameManager {
       showFps = !showFps;
     }
 
+    // READY画面・WARNING画面はスペースキーで開始する
+    // （修正：クリック開始からスペースキー開始に変更）
+    if (k == ' ') {
+
+      if (scene == SCENE_STAGE_START) {
+
+        timer = 0;
+
+        scene = SCENE_PLAY;
+
+      }
+      else if (scene == SCENE_WARNING) {
+
+        timer = 0;
+
+        scene = SCENE_BOSS;
+
+        stage.spawnBoss();
+
+        ui.setBoss(stage.boss); // ボスHP/名前表示のためUIManagerに渡す
+
+      }
+
+    }
+
     // 属性切り替え（修正：Weapon.switchAttribute()が未使用だった）
     // 1=水 / 2=炎 / 3=雷、スペースキーで順番に切り替え
+    // ※READY/WARNING画面のスペースキー開始とは、scene条件が排他なので競合しない
     if (scene == SCENE_PLAY || scene == SCENE_BOSS) {
 
       if (k == '1') {

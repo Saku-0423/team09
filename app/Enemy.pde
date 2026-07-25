@@ -290,7 +290,7 @@ class Enemy {
   void damage(int damage, int attribute) {
 
     if (attribute == weakType) {
-      hp -= damage * 2;
+      hp -= damage * WEAK_DAMAGE_MULTIPLIER;
     } else {
       hp -= damage;
     }

@@ -49,7 +49,7 @@ class Player {
     // （処理落ちでFPSが下がっても無敵時間が延びないように）
     if (isInvincible && millis() >= invincibleUntil) {
       isInvincible = false;
-    }
+        }
 
     updateBullets();
   }
@@ -107,6 +107,7 @@ class Player {
     invincibleUntil = millis() + durationMs;
   }
 
+
   // 残機回復アイテム取得時に呼ぶ（上限PLAYER_MAX_LIFEまで）
   void recoverLife() {
     if (life < PLAYER_MAX_LIFE) {
@@ -120,6 +121,11 @@ class Player {
   }
 
   // 自機と弾を描画する
+  // ステージ遷移時などに、画面に残っている自機弾を消すためのメソッド
+  void clearBullets() {
+    bullets.clear();
+  }
+
   void draw() {
     // 無敵中は自機のみ点滅させる（弾は通常通り描画）
     if (!(isInvincible && frameCount % 6 < 3)) {
